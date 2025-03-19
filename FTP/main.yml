@@ -1,23 +1,33 @@
-name: Deploy via FTP
+name: Deploy via SCP
 
 on:
   push:
     branches:
-      - main
+      - main  # Déclenchement sur la branche principale
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Upload files via FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.3.0
+      - name: Debug Variables
+        run: |
+          echo "SFTP_HOST=${{ vars.SFTP_HOST }}"
+          echo "SFTP_USER=${{ vars.SFTP_USER }}"
+          echo "ID_SERVERS=${{ vars.ID_SERVERS }}"
+        shell: bash
+
+      - name: Upload files via SCP
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: ftp.example.com
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          local-dir: "./"
-          server-dir: "/chemin/destination/"
+          host: ${{ vars.SFTP_HOST }}
+          username: ${{ vars.SFTP_USER }}
+          password: ${{ secrets.SFTP_PASS }}
+          port: 22
+          source: "./cogs/"
+          target: "/var/lib/vz/pterodactyl/volumes/${{ vars.ID_SERVERS }}/"
+          overwrite: true
+          timeout: 30s

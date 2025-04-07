@@ -1,0 +1,36 @@
+name: Update date.php
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-date:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+
+      - name: Generate date.php
+        run: |
+          echo "<?php" > date.php
+          echo "// Dernière mise à jour automatique" >> date.php
+          echo "\$last_update = '"$(date -u -d '-4 hours' '+%Y-%m-%d %H:%M:%S')"' ;" >> date.php
+          echo "?>" >> date.php
+
+      - name: Commit and push date.php
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add date.php
+          git commit -m "🕒 Mise à jour automatique de date.php"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

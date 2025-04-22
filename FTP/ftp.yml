@@ -1,0 +1,33 @@
+name: Deploy via FTP
+
+on:
+  push:
+    branches:
+      - main  # Déclenchement sur push dans la branche principale
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Debug Variables
+        run: |
+          echo "FTP_HOST=${{ vars.FTP_HOST }}"
+          echo "FTP_USER=${{ vars.FTP_USER }}"
+          echo "ID_SERVERS=${{ vars.ID_SERVERS }}"
+        shell: bash
+
+      - name: Upload via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ vars.FTP_HOST }}
+          username: ${{ vars.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          protocol: ftp
+          port: 21
+          local-dir: ./cogs/
+          server-dir: /var/lib/vz/pterodactyl/volumes/${{ vars.ID_SERVERS }}/
+          dangerous-clean-slate: false  # Ne supprime rien côté serveur
